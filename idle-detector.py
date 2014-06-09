@@ -31,7 +31,7 @@ import pyinotify
 
 
 # if for a given time no data is tx'ed or rx'ed 
-OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 26], ['tcp', 70] ]
+OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 22], ['tcp', 70] ]
 
 # Timeout in seconds (1800 -> 30 min)
 TIMEOUT = 10
@@ -59,7 +59,8 @@ class UnitException(Exception): pass
 class EventHandler(pyinotify.ProcessEvent):
 
     def process_IN_MODIFY(self, event):
-        print("IN_MODIFY: %s\n" % (event.pathname))
+        print("IN_MODIFY triggered %s\n" % (event.pathname))
+        print("execute: %s\n" % (EXEC_CMD))
 
 
 class IdleDetector:
