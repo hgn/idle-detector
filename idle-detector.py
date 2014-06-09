@@ -24,10 +24,10 @@ import pyinotify
 OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 22], ['tcp', 70] ]
 
 # Timeout in seconds (1800 -> 30 min)
-TIMEOUT = 1800
+TIMEOUT = 20
 
 # executed command ofter timeout
-EXEC_CMD = "poweroff"
+EXEC_CMD = "echo 1"
 
 
 TIMER_ID = "trafficidle"
@@ -80,8 +80,11 @@ class IdleDetector(pyinotify.ProcessEvent):
     def print(self, string):
         sys.stdout.write(string)
 
+    def clean_iptables(self):
+        self.exec_iptables(" -F")
+        self.exec_iptables(" -X")
 
-    def register_idletimer_targets(self):
+    def exec_idletimer_targets(self):
         for port in OBSERVED_PORTS_BIDIRECTIONAL:
             rule = " -I INPUT -p %s --sport %s -j IDLETIMER --timeout %s --label %s" % \
                    (port[0], port[1], TIMEOUT, TIMER_ID)
@@ -92,7 +95,8 @@ class IdleDetector(pyinotify.ProcessEvent):
 
 
     def run(self):
-        self.register_idletimer_targets()
+        self.clean_iptables()
+        self.exec_idletimer_targets()
         handler = self
         wm = pyinotify.WatchManager()
         notifier = pyinotify.Notifier(wm, handler)
