@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with MachineCodeAnalyzer. If not, see <http://www.gnu.org/licenses/>.
 
-
 import sys
 import os
 import optparse
 import subprocess
 import time
+import pyinotify
 
 # Required Python Dependencies
 #
@@ -30,21 +30,23 @@ import time
 #   sudo pacman -S community/python-pyinotify
 
 
-
 # if for a given time no data is tx'ed or rx'ed 
-OBSERVED_PORTS_BIDIRECTIONAL = [ 22, 80 ]
+OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 26], ['tcp', 70] ]
 
-# Timeout in seconds (30 min)
-TIMEOUT = 1800
+# Timeout in seconds (1800 -> 30 min)
+TIMEOUT = 10
 
 # executed command ofter timeout
 EXEC_CMD = "echo 1 > /tmp/foo"
+
 
 
 __programm__ = "idle-detector"
 __author__   = "Hagen Paul Pfeifer"
 __version__  = "1"
 __license__  = "GPLv3"
+
+TIMER_ID = "trafficidle"
 
 # custom exceptions
 class ArgumentException(Exception): pass
@@ -54,9 +56,13 @@ class NotImplementedException(InternalException): pass
 class UnitException(Exception): pass
 
 
+class EventHandler(pyinotify.ProcessEvent):
+
+    def process_IN_MODIFY(self, event):
+        print("IN_MODIFY: %s\n" % (event.pathname))
+
 
 class IdleDetector:
-
 
     def __init__(self):
         self.parse_local_options()
@@ -73,7 +79,6 @@ class IdleDetector:
         parser.add_option( "-v", "--verbose", dest="verbose", default=False,
                           action="store_true", help="show verbose")
         self.opts, args = parser.parse_args(sys.argv[0:])
-
 
 
     def process(self, cmd):
@@ -109,22 +114,25 @@ class IdleDetector:
 
     def register_idletimer_targets(self):
         for port in OBSERVED_PORTS_BIDIRECTIONAL:
-            print(port)
-        #self.exec_iptables()
+            rule = " -I INPUT -p %s --sport %s -j IDLETIMER --timeout %s --label %s" % (port[0], port[1], TIMEOUT, TIMER_ID)
+            self.exec_iptables(rule)
+            rule = " -I INPUT -p %s --dport %s -j IDLETIMER --timeout %s --label %s" % (port[0], port[1], TIMEOUT, TIMER_ID)
+            self.exec_iptables(rule)
 
 
     def run(self):
         self.register_idletimer_targets()
+        handler = EventHandler()
+        wm = pyinotify.WatchManager()
+        notifier = pyinotify.Notifier(wm, handler)
+        wm.add_watch('/sys/devices/virtual/xt_idletimer/timers/%s' % (TIMER_ID), pyinotify.IN_MODIFY)
+        notifier.loop()
 
 
 
     def print_usage(self):
-        sys.stderr.write("Usage: mca [-h | --help]" +
-                         " [--version]" +
-                         " <modulename> [<module-options>] <binary>\n")
-
-
-
+        sys.stderr.write("Usage: idle-detector [-h | --help]" +
+                         " [--version]\n")
 
 
 if __name__ == "__main__":
