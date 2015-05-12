@@ -1,0 +1,10 @@
+[Unit]
+Description=Idle Detector and Shutdown Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/xvfb-run bash %h/.xinitrc
+Type=idle
+
+[Install]
+WantedBy=multi-user.target
