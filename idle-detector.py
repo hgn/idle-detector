@@ -24,10 +24,10 @@ import pyinotify
 OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 22], ['tcp', 70] ]
 
 # Timeout in seconds (1800 -> 30 min)
-TIMEOUT = 20
+TIMEOUT = 1800
 
 # executed command ofter timeout
-EXEC_CMD = "echo 1"
+EXEC_CMD = "poweroff"
 
 
 TIMER_ID = "trafficidle"

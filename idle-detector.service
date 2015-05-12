@@ -3,8 +3,8 @@ Description=Idle Detector and Shutdown Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/xvfb-run bash %h/.xinitrc
-Type=idle
+ExecStart=/usr/local/bin/idle-detector.py
+Type=simple
 
 [Install]
 WantedBy=multi-user.target
