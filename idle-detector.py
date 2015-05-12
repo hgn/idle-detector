@@ -31,7 +31,7 @@ import pyinotify
 
 
 # if for a given time no data is tx'ed or rx'ed 
-OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 26], ['tcp', 70] ]
+OBSERVED_PORTS_BIDIRECTIONAL = [ ['tcp', 22], ['tcp', 70] ]
 
 # Timeout in seconds (1800 -> 30 min)
 TIMEOUT = 10
@@ -44,7 +44,7 @@ EXEC_CMD = "echo 1 > /tmp/foo"
 __programm__ = "idle-detector"
 __author__   = "Hagen Paul Pfeifer"
 __version__  = "1"
-__license__  = "GPLv3"
+__license__  = "Public Domain"
 
 TIMER_ID = "trafficidle"
 
