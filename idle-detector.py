@@ -92,6 +92,12 @@ class IdleDetector(pyinotify.ProcessEvent):
                    (port[0], port[1], TIMEOUT, TIMER_ID)
             self.exec_iptables(rule)
 
+    def wait_for_ready_sys_device(self, dev):
+        for i in range(10):
+            if os.path.isfile(dev):
+                return True
+            time.sleep(0.1)
+        return False
 
     def run(self):
         self.clean_iptables()
@@ -100,8 +106,11 @@ class IdleDetector(pyinotify.ProcessEvent):
         wm = pyinotify.WatchManager()
         notifier = pyinotify.Notifier(wm, handler)
         self.print("now waiting for idle timer event\n")
-        wm.add_watch('/sys/devices/virtual/xt_idletimer/timers/%s' % \
-                     (TIMER_ID), pyinotify.IN_MODIFY)
+        dev = '/sys/devices/virtual/xt_idletimer/timers/%s' % (TIMER_ID)
+        ret = self.wait_for_ready_sys_device(dev)
+        if ret == False:
+            return 1
+        wm.add_watch(dev, pyinotify.IN_MODIFY)
         notifier.loop()
 
 
