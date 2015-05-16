@@ -5,6 +5,7 @@ After=network.target
 [Service]
 ExecStart=/usr/local/bin/idle-detector.py
 Type=simple
+StandardOutput=inherit
 
 [Install]
 WantedBy=multi-user.target
