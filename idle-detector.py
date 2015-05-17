@@ -95,12 +95,14 @@ class IdleDetector(pyinotify.ProcessEvent):
     def wait_for_ready_sys_device(self, dev):
         self.print("wait untile device file is ready: %s\n" % (dev))
         for i in range(10):
+            self.print("try %d for device\n"  % (i))
             if os.path.isfile(dev):
                 return True
-            time.sleep(0.1)
+            time.sleep(1.0)
         return False
 
     def run(self):
+        time.sleep(1.0)
         self.clean_iptables()
         self.exec_idletimer_targets()
         handler = self
